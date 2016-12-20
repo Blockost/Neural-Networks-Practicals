@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------
 -- example-linear-regression.lua
--- 
+--
 -- This script provides a very simple step-by-step example of
 -- linear regression, using Torch7's neural network (nn) package,
 -- and the optimization package (optim).
@@ -55,17 +55,17 @@ logger = optim.Logger('loss_log.txt')
 -- and corn is our target value.
 
 --  {corn, fertilizer, insecticide}
-data = torch.Tensor{
-   {40,  6,  4},
-   {44, 10,  4},
-   {46, 12,  5},
-   {48, 14,  7},
-   {52, 16,  9},
-   {58, 18, 12},
-   {60, 22, 14},
-   {68, 24, 20},
-   {74, 26, 21},
-   {80, 32, 24}
+data = torch.Tensor {
+    { 40, 6, 4 },
+    { 44, 10, 4 },
+    { 46, 12, 5 },
+    { 48, 14, 7 },
+    { 52, 16, 9 },
+    { 58, 18, 12 },
+    { 60, 22, 14 },
+    { 68, 24, 20 },
+    { 74, 26, 21 },
+    { 80, 32, 24 }
 }
 
 
@@ -94,7 +94,7 @@ data = torch.Tensor{
 -- The modules are all defined in the neural network package, which is
 -- named 'nn'.
 
-model = nn.Sequential()                 -- define the container
+model = nn.Sequential() -- define the container
 ninputs = 2; noutputs = 1
 model:add(nn.Linear(ninputs, noutputs)) -- define the only module
 
@@ -134,31 +134,31 @@ x, dl_dx = model:getParameters()
 -- our model, plus one bias.
 
 feval = function(x_new)
-   -- set x to x_new, if differnt
-   -- (in this simple example, x_new will typically always point to x,
-   -- so the copy is really useless)
-   if x ~= x_new then
-      x:copy(x_new)
-   end
+    -- set x to x_new, if differnt
+    -- (in this simple example, x_new will typically always point to x,
+    -- so the copy is really useless)
+    if x ~= x_new then
+        x:copy(x_new)
+    end
 
-   -- select a new training sample
-   _nidx_ = (_nidx_ or 0) + 1
-   if _nidx_ > (#data)[1] then _nidx_ = 1 end
+    -- select a new training sample
+    _nidx_ = (_nidx_ or 0) + 1
+    if _nidx_ > (#data)[1] then _nidx_ = 1 end
 
-   local sample = data[_nidx_]
-   local target = sample[{ {1} }]      -- this funny looking syntax allows
-   local inputs = sample[{ {2,3} }]    -- slicing of arrays.
+    local sample = data[_nidx_]
+    local target = sample[{ { 1 } }] -- this funny looking syntax allows
+    local inputs = sample[{ { 2, 3 } }] -- slicing of arrays.
 
-   -- reset gradients (gradients are always accumulated, to accommodate 
-   -- batch methods)
-   dl_dx:zero()
+    -- reset gradients (gradients are always accumulated, to accommodate
+    -- batch methods)
+    dl_dx:zero()
 
-   -- evaluate the loss function and its derivative wrt x, for that sample
-   local loss_x = criterion:forward(model:forward(inputs), target)
-   model:backward(inputs, criterion:backward(model.output, target))
+    -- evaluate the loss function and its derivative wrt x, for that sample
+    local loss_x = criterion:forward(model:forward(inputs), target)
+    model:backward(inputs, criterion:backward(model.output, target))
 
-   -- return loss(x) and dloss/dx
-   return loss_x, dl_dx
+    -- return loss(x) and dloss/dx
+    return loss_x, dl_dx
 end
 
 -- Given the function above, we can now easily train the model using SGD.
@@ -170,10 +170,10 @@ end
 --   + a learning rate decay, to let the algorithm converge more precisely
 
 sgd_params = {
-   learningRate = 1e-3,
-   learningRateDecay = 1e-4,
-   weightDecay = 0,
-   momentum = 0
+    learningRate = 1e-3,
+    learningRateDecay = 1e-4,
+    weightDecay = 0,
+    momentum = 0
 }
 
 -- We're now good to go... all we have left to do is run over the dataset
@@ -182,39 +182,39 @@ sgd_params = {
 -- but should typically be determinined using cross-validation.
 
 -- we cycle 1e4 times over our training data
-for i = 1,1e4 do
+for i = 1, 1e4 do
 
-   -- this variable is used to estimate the average loss
-   current_loss = 0
+    -- this variable is used to estimate the average loss
+    current_loss = 0
 
-   -- an epoch is a full loop over our training data
-   for i = 1,(#data)[1] do
+    -- an epoch is a full loop over our training data
+    for i = 1, (#data)[1] do
 
-      -- optim contains several optimization algorithms. 
-      -- All of these algorithms assume the same parameters:
-      --   + a closure that computes the loss, and its gradient wrt to x, 
-      --     given a point x
-      --   + a point x
-      --   + some parameters, which are algorithm-specific
-      
-      _,fs = optim.sgd(feval,x,sgd_params)
+        -- optim contains several optimization algorithms.
+        -- All of these algorithms assume the same parameters:
+        --   + a closure that computes the loss, and its gradient wrt to x,
+        --     given a point x
+        --   + a point x
+        --   + some parameters, which are algorithm-specific
 
-      -- Functions in optim all return two things:
-      --   + the new x, found by the optimization method (here SGD)
-      --   + the value of the loss functions at all points that were used by
-      --     the algorithm. SGD only estimates the function once, so
-      --     that list just contains one value.
+        _, fs = optim.sgd(feval, x, sgd_params)
 
-      current_loss = current_loss + fs[1]
-   end
+        -- Functions in optim all return two things:
+        --   + the new x, found by the optimization method (here SGD)
+        --   + the value of the loss functions at all points that were used by
+        --     the algorithm. SGD only estimates the function once, so
+        --     that list just contains one value.
 
-   -- report average error on epoch
-   current_loss = current_loss / (#data)[1]
-   print('current loss = ' .. current_loss)
-   
-   logger:add{['training error'] = current_loss}
-   logger:style{['training error'] = '-'}
-   logger:plot()  
+        current_loss = current_loss + fs[1]
+    end
+
+    -- report average error on epoch
+    current_loss = current_loss / (#data)[1]
+    print('current loss (whole epoch) = ' .. current_loss)
+
+    logger:add { ['training error'] = current_loss }
+    logger:style { ['training error'] = '-' }
+    -- logger:plot() // crashed the program...
 end
 
 ----------------------------------------------------------------------
@@ -229,11 +229,34 @@ end
 
 -- We compare our approximate results with the text's results.
 
-text = {40.32, 42.92, 45.33, 48.85, 52.37, 57, 61.82, 69.78, 72.19, 79.42}
+text = { 40.32, 42.92, 45.33, 48.85, 52.37, 57, 61.82, 69.78, 72.19, 79.42 }
 
 print('id  approx   text')
-for i = 1,(#data)[1] do
-   local myPrediction = model:forward(data[i][{{2,3}}])
-   print(string.format("%2d  %6.2f %6.2f", i, myPrediction[1], text[i]))
+for i = 1, (#data)[1] do
+    local myPrediction = model:forward(data[i][{ { 2, 3 } }])
+    print(string.format("%2d  %6.2f %6.2f", i, myPrediction[1], text[i]))
 end
 
+
+----------------------------------------------------------------------
+-- 6. Questions
+
+local param = model:getParameters()
+print(string.format(
+    'Final model parameters: %.4f %.4f %.4f \n', param[1], param[2], param[3]))
+
+-- The more loop over dataset, the closer to the mathematical solution will it be
+dataTest = torch.Tensor {
+    { 6, 4 },
+    { 10, 5 },
+    { 14, 8 }
+}
+
+local i = 1
+local max = dataTest:size(1)
+while i <= max do
+    local predict = model:forward(dataTest[i])
+    print(string.format("%.2f predicted on sample {%2d, %2d}",
+        predict[1], dataTest[i][1], dataTest[i][2]))
+    i = i + 1
+end
