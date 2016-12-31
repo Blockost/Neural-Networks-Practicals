@@ -43,3 +43,7 @@ luac.out
 
 # Intellij files
 .idea
+
+# Project files
+loss_log.txt
+loss_log.txt.eps
